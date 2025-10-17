@@ -28,7 +28,7 @@ import { DashboardSoporte } from "./components/soporte/DashboardSoporte";
 import { DashboardCliente } from "./components/client/DashboardClient";
 import { NuevaSolicitud } from "./components/client/NuevaSolicitud";
 import { MisSolicitudes } from "./components/client/MisSolicitudes";
-import { DetalleSolicitud } from "./components/client/DetalleSolicitud";
+import { DetalleSolicitud } from "./pages/DetalleSolicitud";
 import { Perfil } from "./pages/Perfil";
 
 export default function App() {
@@ -58,9 +58,15 @@ export default function App() {
 
         {/* Soporte routes */}
         <Route path="/dashboard/soporte" element={<DashboardSoporte />} />
-        <Route path="/dashboard/soporte/mis-asignadas" element={<DashboardSoporte />} />
+        <Route
+          path="/dashboard/soporte/mis-asignadas"
+          element={<DashboardSoporte />}
+        />
         <Route path="/dashboard/soporte/todas" element={<DashboardSoporte />} />
-        <Route path="/dashboard/soporte/solicitudes/:id" element={<DetalleSolicitud />} />
+        <Route
+          path="/dashboard/soporte/solicitudes/:id"
+          element={<DetalleSolicitud />}
+        />
         <Route path="/dashboard/soporte/perfil" element={<Perfil />} />
 
         {/* Admin routes */}
@@ -69,6 +75,10 @@ export default function App() {
         <Route
           path="/dashboard/admin/solicitudes"
           element={<DashboardSoporte />}
+        />
+        <Route
+          path="/dashboard/admin/solicitudes/:id"
+          element={<DetalleSolicitud />}
         />
         <Route path="/dashboard/admin/reportes" element={<Reportes />} />
 

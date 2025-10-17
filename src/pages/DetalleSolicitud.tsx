@@ -1,27 +1,28 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Send, Clock } from "lucide-react";
-import { DashboardLayout } from "../../components/layouts/DashboardLayout";
+import { DashboardLayout } from "../components/layouts/DashboardLayout";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Textarea } from "../../components/ui/textarea";
-import { StatusBadge } from "../../components/StatusBadge";
-import { PriorityBadge } from "../../components/PriorityBadge";
-import { UserAvatar } from "../../components/UserAvatar";
-import { Badge } from "../../components/ui/badge";
-import { Separator } from "../../components/ui/separator";
-import { getCategoryLabel, getRoleLabel } from "../../lib/mock-data";
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Textarea } from "../components/ui/textarea";
+import { StatusBadge } from "../components/StatusBadge";
+import { PriorityBadge } from "../components/PriorityBadge";
+import { UserAvatar } from "../components/UserAvatar";
+import { Badge } from "../components/ui/badge";
+import { Separator } from "../components/ui/separator";
+import { getCategoryLabel, getRoleLabel } from "../lib/mock-data";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { userStore } from "@/store/user.store";
 import type { IRequests } from "@/types";
 import { requestGetOneApi } from "@/api/requests.api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DetalleSolicitud() {
   const { user: currentUser } = userStore();
@@ -40,9 +41,32 @@ export function DetalleSolicitud() {
       getRequestById(id);
     } else {
       toast.error("ID de solicitud no proporcionado");
-      navigate("/dashboard/cliente/mis-solicitudes");
+      if (currentUser?.role === "ADMIN") {
+        navigate("/dashboard/admin/solicitudes");
+        return;
+      } else {
+        navigate("/dashboard/cliente/mis-solicitudes");
+        return;
+      }
     }
   }, []);
+
+  if (!request) {
+    return (
+      <DashboardLayout user={currentUser!} title="Cargando..." breadcrumbs={[]}>
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Skeleton className=" w-full h-4 mb-4 " />
+            <Skeleton className=" w-full h-4 mb-4 " />
+            <Skeleton className=" w-full h-4 mb-4 " />
+            <Skeleton className=" w-full h-4 mb-4 " />
+            <Skeleton className=" w-full h-4 mb-4 " />
+            <Skeleton className=" w-full h-4 mb-4 " />
+          </CardContent>
+        </Card>
+      </DashboardLayout>
+    );
+  }
 
   if (!request) {
     return (
@@ -87,17 +111,32 @@ export function DetalleSolicitud() {
       user={currentUser!}
       title={`Solicitud ${request.id}`}
       breadcrumbs={[
-        { label: "Dashboard", path: "/dashboard/cliente" },
+        {
+          label: "Dashboard",
+          path:
+            currentUser?.role === "ADMIN"
+              ? "/dashboard/admin"
+              : "/dashboard/cliente",
+        },
         {
           label: "Mis Solicitudes",
-          path: "/dashboard/cliente/mis-solicitudes",
+          path:
+            currentUser?.role === "ADMIN"
+              ? "/dashboard/admin/solicitudes"
+              : "/dashboard/cliente/mis-solicitudes",
         },
         { label: request.id! },
       ]}
     >
       <div className="mb-4">
         <Button variant="ghost" asChild>
-          <Link to="/dashboard/cliente/mis-solicitudes">
+          <Link
+            to={
+              currentUser?.role === "ADMIN"
+                ? "/dashboard/admin/solicitudes"
+                : "/dashboard/cliente/mis-solicitudes"
+            }
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver a mis solicitudes
           </Link>

@@ -7,13 +7,13 @@ export interface IRequests {
   status: "PENDING" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "CANCELLED";
   clientId?: string;
   userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
   user?: {
     id: string;
     email: string;
     name: string;
   };
-  createdAt?: string;
-  updatedAt?: string;
   responses?:
     | {
         id?: string;
