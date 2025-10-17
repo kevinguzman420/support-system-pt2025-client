@@ -7,7 +7,6 @@ import {
   User,
   Users,
   BarChart3,
-  Settings,
   Menu,
   X,
   Bell,
@@ -132,11 +131,6 @@ export function DashboardLayout({
             icon: <BarChart3 className="w-5 h-5" />,
             label: "Reportes",
             path: "/dashboard/admin/reportes",
-          },
-          {
-            icon: <Settings className="w-5 h-5" />,
-            label: "Configuración",
-            path: "/dashboard/admin/configuracion",
           },
         ];
       default:

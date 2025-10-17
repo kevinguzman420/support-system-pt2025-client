@@ -1,6 +1,4 @@
 import {
-  Download,
-  Calendar,
   TrendingUp,
   Users,
   Clock,
@@ -13,8 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { mockTickets, mockUsers } from "../../lib/mock-data";
+import { Badge } from "../../components/ui/badge";
 import {
   AreaChart,
   Area,
@@ -35,78 +32,179 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { subDays, format } from "date-fns";
+import { subDays, format, parseISO, differenceInHours } from "date-fns";
 import { es } from "date-fns/locale";
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import { userStore } from "@/store/user.store";
+import { useEffect, useState } from "react";
+import { requestGetAllApi } from "@/api/requests.api";
+import type { IRequests } from "@/types";
+import { Skeleton } from "../ui/skeleton";
 
 export function Reportes() {
   const { user: currentUser } = userStore();
-  // Métricas generales
-  const totalTickets = mockTickets.length;
-  const resolvedTickets = mockTickets.filter(
+  const [allRequests, setAllRequests] = useState<IRequests[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const getAllRequests = async () => {
+    setLoading(true);
+    const response = await requestGetAllApi();
+    if (response.success && response.requests) {
+      setAllRequests(response.requests);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getAllRequests();
+  }, []);
+
+  // Métricas generales basadas en datos reales
+  const totalTickets = allRequests.length;
+  const resolvedTickets = allRequests.filter(
     (t) => t.status === "RESOLVED" || t.status === "CLOSED"
   ).length;
-  const resolutionRate = Math.round((resolvedTickets / totalTickets) * 100);
-  const avgResolutionTime = "1.8 días";
+  const resolutionRate = totalTickets > 0 ? Math.round((resolvedTickets / totalTickets) * 100) : 0;
+  
+  // Calcular tiempo promedio de resolución
+  const resolvedRequestsWithTime = allRequests.filter(
+    (r) => (r.status === "RESOLVED" || r.status === "CLOSED") && r.createdAt && r.updatedAt
+  );
+  const avgResolutionTimeHours = resolvedRequestsWithTime.length > 0
+    ? resolvedRequestsWithTime.reduce((acc, r) => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return acc + hours;
+      }, 0) / resolvedRequestsWithTime.length
+    : 0;
+  const avgResolutionTime = avgResolutionTimeHours > 24 
+    ? `${(avgResolutionTimeHours / 24).toFixed(1)} días`
+    : `${avgResolutionTimeHours.toFixed(1)} horas`;
 
-  // Datos para gráficos
+  // Datos para el gráfico de tendencia mensual (últimos 30 días)
   const monthlyTrend = Array.from({ length: 30 }, (_, i) => {
     const date = subDays(new Date(), 29 - i);
+    const dateStr = format(date, "yyyy-MM-dd");
+    
+    const creadas = allRequests.filter((r) => {
+      if (!r.createdAt) return false;
+      const reqDate = format(parseISO(r.createdAt), "yyyy-MM-dd");
+      return reqDate === dateStr;
+    }).length;
+    
+    const resueltas = allRequests.filter((r) => {
+      if (!r.updatedAt || (r.status !== "RESOLVED" && r.status !== "CLOSED")) return false;
+      const reqDate = format(parseISO(r.updatedAt), "yyyy-MM-dd");
+      return reqDate === dateStr;
+    }).length;
+    
     return {
       fecha: format(date, "dd MMM", { locale: es }),
-      creadas: Math.floor(Math.random() * 10) + 2,
-      resueltas: Math.floor(Math.random() * 8) + 1,
+      creadas,
+      resueltas,
     };
   });
 
+  // Desglose por categoría
   const categoryBreakdown = [
     {
       categoria: "Soporte Técnico",
-      cantidad: mockTickets.filter((t) => t.category === "SUPPORT_TECHNICAL")
-        .length,
+      cantidad: allRequests.filter((t) => t.category === "TECHNICAL_SUPPORT").length,
     },
     {
       categoria: "Consulta General",
-      cantidad: mockTickets.filter((t) => t.category === "GENERAL_INQUIRY")
-        .length,
+      cantidad: allRequests.filter((t) => t.category === "GENERAL_INQUIRY").length,
     },
     {
       categoria: "Problema Acceso",
-      cantidad: mockTickets.filter((t) => t.category === "ACCESS_ISSUE").length,
+      cantidad: allRequests.filter((t) => t.category === "ACCESS_ISSUE").length,
     },
     {
       categoria: "Facturación",
-      cantidad: mockTickets.filter((t) => t.category === "BILLING").length,
+      cantidad: allRequests.filter((t) => t.category === "BILLING").length,
     },
     {
       categoria: "Otro",
-      cantidad: mockTickets.filter((t) => t.category === "OTHER").length,
+      cantidad: allRequests.filter((t) => t.category === "OTHER").length,
     },
-  ];
+  ].filter(item => item.cantidad > 0); // Solo mostrar categorías con datos
 
-  const supportTeamPerformance = [
-    {
-      nombre: "Carlos Rodríguez",
-      resueltas: 23,
-      promedio: "2.1h",
-      satisfaccion: "98%",
-    },
-    {
-      nombre: "Ana Martínez",
-      resueltas: 19,
-      promedio: "2.5h",
-      satisfaccion: "96%",
-    },
-  ];
-
+  // Datos de tiempo de resolución
   const resolutionTimeData = [
-    { rango: "< 1 hora", cantidad: 8 },
-    { rango: "1-4 horas", cantidad: 15 },
-    { rango: "4-12 horas", cantidad: 12 },
-    { rango: "12-24 horas", cantidad: 7 },
-    { rango: "> 24 horas", cantidad: 3 },
+    { 
+      rango: "< 1 hora", 
+      cantidad: resolvedRequestsWithTime.filter(r => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return hours < 1;
+      }).length 
+    },
+    { 
+      rango: "1-4 horas", 
+      cantidad: resolvedRequestsWithTime.filter(r => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return hours >= 1 && hours < 4;
+      }).length 
+    },
+    { 
+      rango: "4-12 horas", 
+      cantidad: resolvedRequestsWithTime.filter(r => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return hours >= 4 && hours < 12;
+      }).length 
+    },
+    { 
+      rango: "12-24 horas", 
+      cantidad: resolvedRequestsWithTime.filter(r => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return hours >= 12 && hours < 24;
+      }).length 
+    },
+    { 
+      rango: "> 24 horas", 
+      cantidad: resolvedRequestsWithTime.filter(r => {
+        const hours = differenceInHours(parseISO(r.updatedAt!), parseISO(r.createdAt!));
+        return hours >= 24;
+      }).length 
+    },
   ];
+
+  // Top usuarios con más solicitudes
+  const userRequestCounts = allRequests.reduce((acc, req) => {
+    if (!req.user?.name) return acc;
+    const userName = req.user.name;
+    if (!acc[userName]) {
+      acc[userName] = { name: userName, count: 0, email: req.user.email };
+    }
+    acc[userName].count++;
+    return acc;
+  }, {} as Record<string, { name: string; count: number; email: string }>);
+
+  const topUsers = Object.values(userRequestCounts)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  if (loading) {
+    return (
+      <DashboardLayout
+        user={currentUser!}
+        title="Reportes y Estadísticas"
+        breadcrumbs={[
+          { label: "Dashboard", path: "/dashboard/admin" },
+          { label: "Reportes" },
+        ]}
+      >
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+          </div>
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -118,35 +216,6 @@ export function Reportes() {
       ]}
     >
       <div className="space-y-6">
-        {/* Date Range Selector */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm">
-                  Hoy
-                </Button>
-                <Button variant="outline" size="sm">
-                  Esta Semana
-                </Button>
-                <Button variant="outline" size="sm">
-                  Este Mes
-                </Button>
-                <Button variant="default" size="sm">
-                  Últimos 30 días
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Personalizado
-                </Button>
-              </div>
-              <Button>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar Reporte
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -215,10 +284,10 @@ export function Reportes() {
                     Clientes Activos
                   </p>
                   <p className="text-3xl">
-                    {mockUsers.filter((u) => u.role === "CLIENT").length}
+                    {Object.keys(userRequestCounts).length}
                   </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    +3 nuevos este mes
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Usuarios con solicitudes
                   </p>
                 </div>
                 <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
@@ -359,43 +428,41 @@ export function Reportes() {
           </Card>
         </div>
 
-        {/* Support Team Performance */}
+        {/* Top Users with Most Requests */}
         <Card>
           <CardHeader>
-            <CardTitle>Performance del Equipo de Soporte</CardTitle>
+            <CardTitle>Usuarios con Más Solicitudes</CardTitle>
             <CardDescription>
-              Métricas de rendimiento individual
+              Top 5 usuarios que han creado más tickets
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Agente</TableHead>
-                  <TableHead>Solicitudes Resueltas</TableHead>
-                  <TableHead>Tiempo Promedio</TableHead>
-                  <TableHead>Satisfacción</TableHead>
+                  <TableHead>Usuario</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Total Solicitudes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {supportTeamPerformance.map((agent, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{agent.nombre}</TableCell>
-                    <TableCell>{agent.resueltas}</TableCell>
-                    <TableCell>{agent.promedio}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden max-w-[100px]">
-                          <div
-                            className="h-full bg-green-500"
-                            style={{ width: agent.satisfaccion }}
-                          />
-                        </div>
-                        <span className="text-sm">{agent.satisfaccion}</span>
-                      </div>
+                {topUsers.length > 0 ? (
+                  topUsers.map((user, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{user.count}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-muted-foreground">
+                      No hay datos disponibles
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
