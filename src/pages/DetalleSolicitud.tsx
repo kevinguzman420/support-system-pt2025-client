@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Send, Clock } from "lucide-react";
+import { ArrowLeft, Send, Clock, Sparkles } from "lucide-react";
 import { DashboardLayout } from "../components/layouts/DashboardLayout";
 import {
   Card,
@@ -24,6 +24,7 @@ import type { IRequests } from "@/types";
 import { requestGetOneApi } from "@/api/requests.api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createResponseApi } from "@/api/responses.api";
+import { generateResponseSuggestion } from "@/api/ai-suggestions.api";
 
 export function DetalleSolicitud() {
   const { user: currentUser } = userStore();
@@ -31,6 +32,7 @@ export function DetalleSolicitud() {
   const navigate = useNavigate();
   const [responseText, setResponseText] = useState("");
   const [sending, setSending] = useState(false);
+  const [generatingSuggestion, setGeneratingSuggestion] = useState(false);
   const [request, setRequest] = useState<IRequests | null>(null);
 
   const getRequestById = async (id: string) => {
@@ -128,6 +130,33 @@ export function DetalleSolicitud() {
     }
 
     setSending(false);
+  };
+
+  const handleGenerateSuggestion = async () => {
+    if (!request) return;
+
+    setGeneratingSuggestion(true);
+    toast.loading("Generando sugerencia con IA...");
+
+    const previousResponses = request.responses?.map(r => r.content || "") || [];
+
+    const result = await generateResponseSuggestion({
+      title: request.title,
+      description: request.description,
+      category: request.category,
+      previousResponses,
+    });
+
+    toast.dismiss();
+
+    if (result.success) {
+      setResponseText(result.suggestion);
+      toast.success("Sugerencia generada correctamente");
+    } else {
+      toast.error(result.message || "Error al generar sugerencia");
+    }
+
+    setGeneratingSuggestion(false);
   };
 
   const responses = request.responses || [];
@@ -267,7 +296,23 @@ export function DetalleSolicitud() {
               {request.status !== "CLOSED" &&
                 request.status !== "CANCELLED" && (
                   <div className="mt-6 pt-6 border-t">
-                    <h4 className="mb-3">Agregar respuesta</h4>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4>Agregar respuesta</h4>
+                      {(currentUser?.role === "ADMIN" ||
+                        currentUser?.role === "SUPPORT") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleGenerateSuggestion}
+                          disabled={generatingSuggestion}
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          {generatingSuggestion
+                            ? "Generando..."
+                            : "Sugerir con IA"}
+                        </Button>
+                      )}
+                    </div>
                     <div className="space-y-3">
                       <Textarea
                         placeholder="Escribe tu mensaje aquí..."
