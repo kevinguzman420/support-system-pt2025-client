@@ -1,3 +1,5 @@
+export type UserRole = "ADMIN" | "SUPPORT" | "CLIENT";
+
 export interface IRequests {
   id?: string;
   title: string;
@@ -23,7 +25,7 @@ export interface IRequests {
           id: string;
           name: string;
           email: string;
-          role: "ADMIN" | "SUPPORT" | "CLIENT";
+          role: UserRole;
         };
       }[]
     | null;
@@ -33,7 +35,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "SUPPORT" | "CLIENT";
+  role: UserRole;
   active?: boolean;
   createdAt?: string;
   updatedAt?: string;

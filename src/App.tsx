@@ -30,6 +30,8 @@ import { NuevaSolicitud } from "./components/client/NuevaSolicitud";
 import { MisSolicitudes } from "./components/client/MisSolicitudes";
 import { DetalleSolicitud } from "./pages/DetalleSolicitud";
 import { Perfil } from "./pages/Perfil";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { PublicRoute } from "./components/PublicRoute";
 
 export default function App() {
   return (
@@ -37,46 +39,133 @@ export default function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
         {/* <Route path="/register" element={<Register />} /> */}
 
         {/* Cliente routes */}
-        <Route path="/dashboard/cliente" element={<DashboardCliente />} />
+        <Route
+          path="/dashboard/cliente"
+          element={
+            <ProtectedRoute allowedRoles={["CLIENT"]}>
+              <DashboardCliente />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/cliente/nueva-solicitud"
-          element={<NuevaSolicitud />}
+          element={
+            <ProtectedRoute allowedRoles={["CLIENT"]}>
+              <NuevaSolicitud />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/dashboard/cliente/mis-solicitudes"
-          element={<MisSolicitudes />}
+          element={
+            <ProtectedRoute allowedRoles={["CLIENT"]}>
+              <MisSolicitudes />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/dashboard/cliente/mis-solicitudes/:id"
-          element={<DetalleSolicitud />}
+          element={
+            <ProtectedRoute allowedRoles={["CLIENT"]}>
+              <DetalleSolicitud />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/dashboard/cliente/perfil" element={<Perfil />} />
+        <Route
+          path="/dashboard/cliente/perfil"
+          element={
+            <ProtectedRoute allowedRoles={["CLIENT"]}>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Soporte routes */}
-        <Route path="/dashboard/soporte" element={<DashboardSoporte />} />
-        <Route path="/dashboard/soporte/todas" element={<DashboardSoporte />} />
+        <Route
+          path="/dashboard/soporte"
+          element={
+            <ProtectedRoute allowedRoles={["SUPPORT"]}>
+              <DashboardSoporte />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/soporte/todas"
+          element={
+            <ProtectedRoute allowedRoles={["SUPPORT"]}>
+              <DashboardSoporte />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/soporte/solicitudes/:id"
-          element={<DetalleSolicitud />}
+          element={
+            <ProtectedRoute allowedRoles={["SUPPORT"]}>
+              <DetalleSolicitud />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/dashboard/soporte/perfil" element={<Perfil />} />
+        <Route
+          path="/dashboard/soporte/perfil"
+          element={
+            <ProtectedRoute allowedRoles={["SUPPORT"]}>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Admin routes */}
-        <Route path="/dashboard/admin" element={<DashboardAdmin />} />
-        <Route path="/dashboard/admin/usuarios" element={<GestionUsuarios />} />
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <DashboardAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/admin/usuarios"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <GestionUsuarios />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/admin/solicitudes"
-          element={<DashboardSoporte />}
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <DashboardSoporte />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/dashboard/admin/solicitudes/:id"
-          element={<DetalleSolicitud />}
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <DetalleSolicitud />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/dashboard/admin/reportes" element={<Reportes />} />
+        <Route
+          path="/dashboard/admin/reportes"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <Reportes />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Catch all - redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
