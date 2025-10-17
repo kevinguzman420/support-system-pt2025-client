@@ -316,22 +316,6 @@ export function DashboardLayout({
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() =>
-                        navigate(`/dashboard/${user?.role}/perfil`)
-                      }
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Perfil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() =>
-                        navigate(`/dashboard/${user?.role}/configuracion`)
-                      }
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Configuración
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />

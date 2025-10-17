@@ -22,3 +22,13 @@ export interface IRequests {
       }[]
     | null;
 }
+
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "SUPPORT" | "CLIENT";
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

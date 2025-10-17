@@ -78,8 +78,6 @@ export function Login() {
         password: data.password,
       });
 
-      console.log(response)
-
       localStorage.setItem("token", response.data.token);
 
       setUser({
