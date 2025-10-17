@@ -187,6 +187,7 @@ export function DashboardSoporte() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>ID</TableHead>
+                          <TableHead>Cliente</TableHead>
                           <TableHead>Título</TableHead>
                           <TableHead>Categoría</TableHead>
                           <TableHead>Estado</TableHead>
@@ -201,6 +202,16 @@ export function DashboardSoporte() {
                           <TableRow key={request.id}>
                             <TableCell className="font-mono text-sm">
                               {request.id}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {request.user?.name || "Desconocido"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {request.user?.email || "N/A"}
+                                </span>
+                              </div>
                             </TableCell>
                             <TableCell className="max-w-xs">
                               <div className="truncate">{request.title}</div>
@@ -241,7 +252,11 @@ export function DashboardSoporte() {
                             </TableCell>
                             <TableCell className="text-right">
                               <Link
-                                to={`/dashboard/admin/solicitudes/${request.id}`}
+                                to={
+                                  currentUser?.role === "ADMIN"
+                                    ? `/dashboard/admin/solicitudes/${request.id}`
+                                    : `/dashboard/soporte/solicitudes/${request.id}`
+                                }
                                 className=" flex justify-center items-center space-x-1 bg-gray-800 hover:bg-gray-950 transition-all text-white p-1 rounded "
                               >
                                 <Eye className="w-4 h-4" />

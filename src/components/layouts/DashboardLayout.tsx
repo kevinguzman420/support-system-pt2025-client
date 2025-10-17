@@ -22,8 +22,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import type { UserRole, IUser } from "../../lib/mock-data";
@@ -206,21 +204,6 @@ export function DashboardLayout({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => navigate(`/dashboard/${user.role}/perfil`)}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigate(`/dashboard/${user.role}/configuracion`)}
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Configuración
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Cerrar Sesión
@@ -307,16 +290,6 @@ export function DashboardLayout({
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div>
-                        <p>{user?.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {user?.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Cerrar Sesión

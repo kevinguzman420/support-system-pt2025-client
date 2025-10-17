@@ -23,6 +23,7 @@ import { userStore } from "@/store/user.store";
 import type { IRequests } from "@/types";
 import { requestGetOneApi } from "@/api/requests.api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createResponseApi } from "@/api/responses.api";
 
 export function DetalleSolicitud() {
   const { user: currentUser } = userStore();
@@ -82,7 +83,15 @@ export function DetalleSolicitud() {
               La solicitud que buscas no existe o no tienes permiso para verla.
             </p>
             <Button asChild>
-              <Link to="/dashboard/cliente/mis-solicitudes">
+              <Link
+                to={
+                  currentUser?.role === "ADMIN"
+                    ? "/dashboard/admin/solicitudes"
+                    : currentUser?.role === "CLIENT"
+                    ? "/dashboard/cliente/mis-solicitudes"
+                    : "/dashboard/soporte/todas"
+                }
+              >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver a mis solicitudes
               </Link>
@@ -95,12 +104,29 @@ export function DetalleSolicitud() {
 
   const handleSendResponse = async () => {
     if (!responseText.trim()) return;
+    if (!id) return;
 
     setSending(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    console.log("Enviando respuesta:", {
+      requestId: id,
+      content: responseText
+    });
 
-    toast.success("Respuesta enviada correctamente");
-    setResponseText("");
+    const response = await createResponseApi({
+      requestId: id,
+      content: responseText
+    });
+
+    if (response.success) {
+      toast.success("Respuesta enviada correctamente");
+      setResponseText("");
+      // Recargar la solicitud para mostrar la nueva respuesta
+      await getRequestById(id);
+    } else {
+      toast.error(response.message || "Error al enviar la respuesta");
+    }
+
     setSending(false);
   };
 
@@ -116,14 +142,18 @@ export function DetalleSolicitud() {
           path:
             currentUser?.role === "ADMIN"
               ? "/dashboard/admin"
-              : "/dashboard/cliente",
+              : currentUser?.role === "CLIENT"
+              ? "/dashboard/cliente"
+              : "/dashboard/soporte",
         },
         {
           label: "Mis Solicitudes",
           path:
             currentUser?.role === "ADMIN"
               ? "/dashboard/admin/solicitudes"
-              : "/dashboard/cliente/mis-solicitudes",
+              : currentUser?.role === "CLIENT"
+              ? "/dashboard/cliente/mis-solicitudes"
+              : "/dashboard/soporte/todas",
         },
         { label: request.id! },
       ]}
@@ -134,7 +164,9 @@ export function DetalleSolicitud() {
             to={
               currentUser?.role === "ADMIN"
                 ? "/dashboard/admin/solicitudes"
-                : "/dashboard/cliente/mis-solicitudes"
+                : currentUser?.role === "CLIENT"
+                ? "/dashboard/cliente/mis-solicitudes"
+                : "/dashboard/soporte/todas"
             }
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -188,15 +220,17 @@ export function DetalleSolicitud() {
                     <div key={response.id}>
                       <div className="flex gap-4">
                         <UserAvatar
-                          name={currentUser?.name!}
+                          name={response.user?.name || "Usuario"}
                           className="flex-shrink-0"
                         />
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span>{currentUser?.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {getRoleLabel(currentUser?.role || "CLIENT")}
-                            </Badge>
+                            <span className="font-medium">{response.user?.name || "Usuario"}</span>
+                            {response.user?.role && (
+                              <Badge variant="secondary" className="text-xs">
+                                {getRoleLabel(response.user.role)}
+                              </Badge>
+                            )}
                             <span className="text-sm text-muted-foreground">
                               {formatDistanceToNow(
                                 new Date(response?.createdAt || new Date()),

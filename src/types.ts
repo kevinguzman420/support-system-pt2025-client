@@ -19,6 +19,12 @@ export interface IRequests {
         id?: string;
         content?: string;
         createdAt?: string;
+        user?: {
+          id: string;
+          name: string;
+          email: string;
+          role: "ADMIN" | "SUPPORT" | "CLIENT";
+        };
       }[]
     | null;
 }

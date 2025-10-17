@@ -5,7 +5,6 @@ import {
   Edit,
   Trash2,
   Eye,
-  FileText,
   EyeOff,
 } from "lucide-react";
 import { DashboardLayout } from "../../components/layouts/DashboardLayout";
@@ -149,7 +148,7 @@ export function GestionUsuarios() {
     }
   };
 
-  const handleDeleteUser = (userId: string, userName: string) => {
+  const handleDeleteUser = (userName: string) => {
     toast.success(`Usuario ${userName} eliminado`);
   };
 
@@ -536,7 +535,7 @@ export function GestionUsuarios() {
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() =>
-                                  handleDeleteUser(user.id, user.name)
+                                  handleDeleteUser(user.id)
                                 }
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
