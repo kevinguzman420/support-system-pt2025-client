@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, HeadphonesIcon } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -20,7 +20,6 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -94,7 +93,6 @@ export function Login() {
         navigate("/dashboard/cliente");
       }
 
-      console.log("Login exitoso:", response.data);
     } catch (error: any) {
       console.error("Error during login:", error);
 
@@ -190,9 +188,6 @@ export function Login() {
                           />
                         </div>
                       </FormControl>
-                      <FormDescription>
-                        This is your public display name.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -228,9 +223,6 @@ export function Login() {
                           </button>
                         </div>
                       </FormControl>
-                      <FormDescription>
-                        This is your public display name.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -249,20 +241,11 @@ export function Login() {
                   <span className="bg-card px-2 text-muted-foreground">o</span>
                 </div>
               </div>
-
-              <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  ¿No tienes cuenta?{" "}
-                </span>
-                <Link to="/register" className="text-primary hover:underline">
-                  Regístrate
-                </Link>
-              </div>
             </form>
           </Form>
 
           {/* Demo credentials helper */}
-          <div className="mt-6 p-4 bg-muted rounded-lg">
+          {/* <div className="mt-6 p-4 bg-muted rounded-lg">
             <p className="text-xs text-muted-foreground mb-2">
               Credenciales de prueba:
             </p>
@@ -280,7 +263,7 @@ export function Login() {
                 <strong>Contraseña para todos:</strong> demo123
               </p>
             </div>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </AuthLayout>

@@ -58,10 +58,6 @@ export default function App() {
 
         {/* Soporte routes */}
         <Route path="/dashboard/soporte" element={<DashboardSoporte />} />
-        <Route
-          path="/dashboard/soporte/mis-asignadas"
-          element={<DashboardSoporte />}
-        />
         <Route path="/dashboard/soporte/todas" element={<DashboardSoporte />} />
         <Route
           path="/dashboard/soporte/solicitudes/:id"

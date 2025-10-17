@@ -179,7 +179,6 @@ export function DashboardAdmin() {
   const getAllRequests = async () => {
     setIsLoading(true);
     const response = await requestGetAllApi();
-    console.log(response)
     if (response.success) {
       setAllRequests(response.requests);
     }

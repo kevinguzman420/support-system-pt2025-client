@@ -21,10 +21,17 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { userStore } from "@/store/user.store";
 import type { IRequests } from "@/types";
-import { requestGetOneApi } from "@/api/requests.api";
+import { requestGetOneApi, requestUpdateStatusApi } from "@/api/requests.api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createResponseApi } from "@/api/responses.api";
 import { generateResponseSuggestion } from "@/api/ai-suggestions.api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function DetalleSolicitud() {
   const { user: currentUser } = userStore();
@@ -33,6 +40,7 @@ export function DetalleSolicitud() {
   const [responseText, setResponseText] = useState("");
   const [sending, setSending] = useState(false);
   const [generatingSuggestion, setGeneratingSuggestion] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [request, setRequest] = useState<IRequests | null>(null);
 
   const getRequestById = async (id: string) => {
@@ -109,15 +117,10 @@ export function DetalleSolicitud() {
     if (!id) return;
 
     setSending(true);
-    
-    console.log("Enviando respuesta:", {
-      requestId: id,
-      content: responseText
-    });
 
     const response = await createResponseApi({
       requestId: id,
-      content: responseText
+      content: responseText,
     });
 
     if (response.success) {
@@ -138,7 +141,8 @@ export function DetalleSolicitud() {
     setGeneratingSuggestion(true);
     toast.loading("Generando sugerencia con IA...");
 
-    const previousResponses = request.responses?.map(r => r.content || "") || [];
+    const previousResponses =
+      request.responses?.map((r) => r.content || "") || [];
 
     const result = await generateResponseSuggestion({
       title: request.title,
@@ -157,6 +161,25 @@ export function DetalleSolicitud() {
     }
 
     setGeneratingSuggestion(false);
+  };
+
+  const handleStatusChange = async (
+    newStatus: "PENDING" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "CANCELLED"
+  ) => {
+    if (!id) return;
+
+    setUpdatingStatus(true);
+
+    const response = await requestUpdateStatusApi(id, { status: newStatus });
+
+    if (response.success) {
+      toast.success("Estado actualizado correctamente");
+      await getRequestById(id);
+    } else {
+      toast.error(response.message || "Error al actualizar el estado");
+    }
+
+    setUpdatingStatus(false);
   };
 
   const responses = request.responses || [];
@@ -254,7 +277,9 @@ export function DetalleSolicitud() {
                         />
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{response.user?.name || "Usuario"}</span>
+                            <span className="font-medium">
+                              {response.user?.name || "Usuario"}
+                            </span>
                             {response.user?.role && (
                               <Badge variant="secondary" className="text-xs">
                                 {getRoleLabel(response.user.role)}
@@ -353,8 +378,37 @@ export function DetalleSolicitud() {
               </div>
               <Separator />
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Estado</p>
-                <StatusBadge status={request.status} />
+                <p className="text-sm text-muted-foreground mb-2">Estado</p>
+                {currentUser?.role === "ADMIN" ||
+                currentUser?.role === "SUPPORT" ? (
+                  <Select
+                    value={request.status}
+                    onValueChange={(value) =>
+                      handleStatusChange(
+                        value as
+                          | "PENDING"
+                          | "IN_PROGRESS"
+                          | "RESOLVED"
+                          | "CLOSED"
+                          | "CANCELLED"
+                      )
+                    }
+                    disabled={updatingStatus}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">Pendiente</SelectItem>
+                      <SelectItem value="IN_PROGRESS">En Progreso</SelectItem>
+                      <SelectItem value="RESOLVED">Resuelto</SelectItem>
+                      <SelectItem value="CLOSED">Cerrado</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <StatusBadge status={request.status} />
+                )}
               </div>
               <Separator />
               <div>

@@ -110,7 +110,6 @@ export function DashboardSoporte() {
 
   const getAllRequests = async () => {
     const response = await requestGetAllApi();
-    console.log(response);
     if (response.success) {
       setFilteredRequests(response.requests);
     } else {

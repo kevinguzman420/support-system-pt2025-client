@@ -166,7 +166,6 @@ export function GestionUsuarios() {
   const getAllUsers = async () => {
     setIsLoading(true);
     const response = await getAllUsersApi();
-    console.log(response);
     if (response.success) {
       setAllUsers(response.users);
     } else {
