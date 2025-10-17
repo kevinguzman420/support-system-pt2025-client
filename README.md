@@ -2,6 +2,10 @@
 
 Sistema de gestión de tickets de soporte técnico desarrollado con React, TypeScript y Vite. Permite a los clientes crear solicitudes, al equipo de soporte gestionarlas, y a los administradores supervisar todo el sistema.
 
+## 🌐 Despliegue en Producción
+
+**URL de Producción (Netlify):** [https://support-system-pt2025.netlify.app]
+
 ## 📋 Tabla de Contenidos
 
 - [Características](#-características)
@@ -608,11 +612,18 @@ Este proyecto es parte de una prueba técnica.
 
 ---
 
+**URL de producción:** [https://support-system-pt2025.netlify.app]
+
+## 📄 Licencia
+
+Este proyecto fue desarrollado como prueba técnica 2025 para CIFRA.
+
 ## 👥 Autor
 
 **Kevin Guzmán**
 - Email: kevinjguzmano777@outlook.com
 - GitHub: [@kevinguzman420](https://github.com/kevinguzman420)
+- Deplegado en[Netlify](https://netlify.com) 
 
 Desarrollado con ❤️ por Kevin Guzmán (Powered by AI)
 ---
