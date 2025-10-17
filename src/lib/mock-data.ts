@@ -20,7 +20,7 @@ export type TicketStatus =
   | "CLOSED"
   | "CANCELLED";
 
-export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export type TicketCategory =
   | "SUPPORT_TECHNICAL"
@@ -228,7 +228,7 @@ export const getPriorityLabel = (priority: TicketPriority): string => {
     LOW: "Baja",
     MEDIUM: "Media",
     HIGH: "Alta",
-    URGENT: "Urgente",
+    CRITICAL: "Crítica",
   };
   return labels[priority];
 };

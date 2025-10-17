@@ -2,7 +2,7 @@ import { Badge } from "./ui/badge";
 import type { TicketPriority } from "../lib/mock-data";
 
 interface PriorityBadgeProps {
-  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  priority: TicketPriority;
 }
 
 export function PriorityBadge({ priority }: PriorityBadgeProps) {

@@ -29,14 +29,14 @@ import {
 import { mockTickets } from "../../lib/mock-data";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { userStore } from "@/store/user.store";
 
 export function DashboardCliente() {
   //   const myTickets = mockTickets.filter((t) => t.clientId === currentUser.id);
   const { user: currentUser } = userStore();
 
-  const [myTickets, setMyTickets] = useState<typeof mockTickets | null>(null);
+  const [myTickets] = useState<typeof mockTickets | null>(null);
   const recentTickets = myTickets?.slice(0, 5) || [];
 
   const stats = {
